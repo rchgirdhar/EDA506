@@ -1,0 +1,48 @@
+
+#Formulate your question - Which state has the highest level of ozone levels per parts per million?
+
+#Read in your data
+ozone = `US.EPA.data.2017.(2)`
+
+#remove spaces from column names
+names(ozone) <- make.names(names(ozone),unique = TRUE)
+
+#Check the packaging
+nrow(ozone)
+ncol(ozone)
+
+#Run str()
+#helps to identify potential problems with the data before plunging in head first into a complicated data analysis
+str(ozone)
+
+
+#Look at the top and the bottom of your data
+#This helps to check if the data were read in properly and things are properly formatted.
+head(ozone[, c(6:7, 10)])
+tail(ozone[, c(6:7, 10)])
+
+#Check your “n”s - helps to confirm that the number of observations is as expected.
+table(ozone$State.Code)
+library(dplyr)
+filter(ozone, Parameter.Name == "Ozone") 
+filozone=filter(ozone, ozone$Units.of.Measure == 'Parts per million' & Parameter.Name == "Ozone")
+summary(filozone)
+#Let us look at the state names
+unique(ozone$State.Name)
+#We got 54 results, but there are only 50 states
+
+#Try the easy solution first
+sol = group_by(ozone, State.Name) %>%
+  summarize(ozone = mean(Arithmetic.Mean)) %>%
+  as.data.frame %>%
+  arrange(desc(ozone))
+
+head(sol,1)
+tail(sol,1)
+#The results show that Rhode Island has the highest ozone level and South Dakota has the lowest ozone levels per parts per million.
+
+#Challenge your solution - Can we find out the top 3 states with the highest ozone level?
+head(sol,3)
+tail(sol,3)
+#The results show that Rhode Island has the highest ozone levels per parts per million, followed by Mississippi and Iowa.
+Follow up
