@@ -1,0 +1,147 @@
+#create a matrix using cbind()
+a = 1:10
+b = 11:20
+c = 21:30
+
+cbind(a,b,c)
+# create a matrix (a,b,c are rows)
+rbind(a,b,c)
+# create a matrix with characters and numeric numbers
+cbind(c(1, 2, 3, 4, 5),
+      c("p", "q", "r", "s", "t"))
+
+# create a matrix of from 1 to 10, 
+# with 5 rows and 2 columns
+matrix(data = 1:10,
+       nrow = 5,
+       ncol = 2)
+
+# the number of rows is 2 and column is 5
+matrix(data = 1:10,
+       nrow = 2,
+       ncol = 5)
+
+# with 5 rows and 2 colums
+matrix(data = 1:10,
+       nrow = 2,
+       ncol = 5,
+       byrow = TRUE)
+
+# create a dataframe named survey
+survey = data.frame("index" = c(1, 2, 3, 4, 5),
+                     "sex" = c("m", "m", "m", "f", "f"),
+                     "age" = c(99, 46, 23, 54, 23))
+
+# review the df
+str(survey)
+
+# create another dataframe of survey without factors
+survey = data.frame("index" = c(1, 2, 3, 4, 5),
+                     "sex" = c("m", "m", "m", "f", "f"),
+                     "age" = c(99, 46, 23, 54, 23),
+                     stringsAsFactors = FALSE)
+
+# review the df, no more factors
+str(survey)
+
+#view the first few rows
+head(ChickWeight)
+
+#view the last few rows
+tail(ChickWeight)
+
+#view the df in a different window
+View(ChickWeight)
+
+#print summary statistics of the df
+summary(ToothGrowth)
+
+#print structure of ToothGrowth
+str(ToothGrowth)
+
+#print names of Toothgrowth
+names(ToothGrowth)
+
+#print 'len' column
+ToothGrowth$len
+
+#print mean of the 'len' column
+mean(ToothGrowth$len)
+
+#print table of the 'supp' column of ToothGrowth.
+table(ToothGrowth$supp)
+
+#print the first few rows of len and supp columns of ToothGrowth
+head(ToothGrowth[c("len", "supp")])
+
+# create a new dataframe survey
+survey = data.frame("index" = c(1, 2, 3, 4, 5),
+                     "age" = c(24, 25, 42, 56, 22))
+
+# add column 'sex' to the 'survey' dataframe
+survey$sex = c("m", "m", "f", "f", "m")
+
+# updatename of the first column
+names(survey)[1] = "participant.number"
+
+# update column name 'age' to 'age.years'
+names(survey)[names(survey) == "age"] = "years"
+
+# print row 1-6 and column 1 of ToothGrowth
+ToothGrowth[1:6, 1]
+
+# print row 1-3 and columns 1, 3 of ToothGrowth
+ToothGrowth[1:3, c(1,3)]
+
+# print row 1 with all columns of ToothGrowth
+ToothGrowth[1, ]
+
+# print column 2 with all rows of ToothGrowth
+ToothGrowth[, 2]
+
+# create new df 'ToothGrowth.VC' with orows of ToothGrowth where 'supp' equals 'VC'
+ToothGrowth.VC = ToothGrowth[ToothGrowth$supp == "VC", ]
+
+# create new df ""ToothGrowth.OJ" with only the rows of ToothGrowth where supp equals OJ and dose < 1
+
+ToothGrowth.OJ.a = ToothGrowth[ToothGrowth$supp == "OJ" &
+                                  ToothGrowth$dose < 1, ]
+
+# print data where len < 20 AND supp == "OJ" AND dose >= 1
+subset(x = ToothGrowth,
+       subset = len < 20 &
+         supp == "OJ" &
+         dose >= 1)
+
+# print data where len > 30 AND supp == "VC" (only return the len and dose columns)
+subset(x = ToothGrowth,
+       subset = len > 30 & supp == "VC",
+       select = c(len, dose))
+
+# What is the mean tooth length of Guinea pigs given OJ?
+# step 1: create a subsettted dataframe called oj
+oj = subset(x = ToothGrowth,
+             subset = supp == "OJ")
+
+#step 2: Calculate the mean of column 'len' from dataset
+mean(oj$len)
+
+#to simplify code, we can use
+mean(ToothGrowth$len[ToothGrowth$supp == "OJ"])
+
+# create a dataframe called health
+health = data.frame("age" = c(32, 24, 43, 19, 43),
+                     "height" = c(1.75, 1.65, 1.50, 1.92, 1.80),
+                     "weight" = c(70, 65, 62, 79, 85))
+
+# calculate bmi 
+health$weight / health$height ^ 2
+
+# To simplify code, we can use with()
+with(health, height / weight ^ 2)
+
+# calculation (long code)
+health$weight + health$height / health$age + 2 * health$height
+
+# Shorten the code above achieving the same result
+with(health, weight + height / age + 2 * height)
