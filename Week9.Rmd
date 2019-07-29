@@ -1,0 +1,56 @@
+---
+title: "Week9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+###Prerequisites
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(lattice)
+library(datasets)
+```
+###Let us add a smooth line to view the trend on plots
+```{r message=FALSE, warning=FALSE}
+with(airquality, 
+     {plot(Temp, Ozone)+lines(loess.smooth(Temp, Ozone))})
+```
+
+###Let us add an annotation to the plot
+```{r message=FALSE, warning=FALSE}
+with(cars, plot(speed, dist))
+title("Speed vs. Stopping distance")
+```
+
+###Let us create a lattice plot. 
+###They tend to be most useful for conditioning types of plots, i.e. looking at how a dependent variable changes with independent variable across levels of a third variable
+```{r message=FALSE, warning=FALSE}
+state <- data.frame(state.x77, region = state.region)
+xyplot(Life.Exp ~ Income | region, data = state, layout = c(4, 1))
+```
+
+###Let us create a scattedr plot with qplot using data mpg
+```{r message=FALSE, warning=FALSE}
+qplot(displ, hwy, data = mpg)
+```
+
+###Chapter 8: Graphic Devices
+###Let us create a graph using plot()
+```{r message=FALSE, warning=FALSE}
+with(faithful, plot(eruptions, waiting))
+title(main = "Old Faithful Geyser data")  
+```
+
+###We can create plots using pdf files
+```{r message=FALSE, warning=FALSE}
+## Open a PDF file from directory
+pdf(file = "myplot.pdf")  
+## Create a plot that will be saved to a file
+with(faithful, plot(eruptions, waiting))  
+title(main = "Old Faithful Geyser data")
+## Close the PDF file
+while (!is.null(dev.list()))  dev.off()
+```
