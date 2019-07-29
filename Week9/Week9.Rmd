@@ -26,7 +26,8 @@ title("Speed vs. Stopping distance")
 ```
 
 ###Let us create a lattice plot. 
-###They tend to be most useful for conditioning types of plots, i.e. looking at how a dependent variable changes with independent variable across levels of a third variable
+###They tend to be most useful for conditioning types of plots, i.e. looking at how a dependent variable changes 
+###with independent variable across levels of a third variable
 ```{r message=FALSE, warning=FALSE}
 state <- data.frame(state.x77, region = state.region)
 xyplot(Life.Exp ~ Income | region, data = state, layout = c(4, 1))
