@@ -1,0 +1,223 @@
+---
+title: "Week10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Prerequisites
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(cluster)
+library(factoextra)
+library(gridExtra)
+library(dendextend)
+```
+
+
+##Let us look at the US Arrests data using K-means clustering
+```{r message=FALSE, warning=FALSE}
+df<-USArrests
+## remove missing data
+df<-na.omit(df)
+##Standardize the data 
+df<-scale(df)
+```
+##Let us calculate the Euclidean distance, which will be used for the clustering
+```{r message=FALSE, warning=FALSE}
+distance <- get_dist(df)
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+```
+
+
+##K-means clustering is used for unsupervised learning. 
+##The idea behind k-means clustering consists of defining clusters so that the total intra-cluster variation is minimized.
+```{r message=FALSE, warning=FALSE}
+k2 <- kmeans(df, centers = 2, nstart = 25)
+str(k2)
+k2
+##Lets visualize the clusters using fviz_cluster
+fviz_cluster(k2, data=df)
+```
+
+
+##We can use standard pairwise scatter plots to illustrate view the clusters and compare against original variables
+```{r message=FALSE, warning=FALSE}
+df %>%
+  as_tibble() %>%
+  mutate(cluster = k2$cluster,
+         state = row.names(USArrests)) %>%
+  ggplot(aes(UrbanPop, Murder, color = factor(cluster), label = state)) +
+  geom_text()
+```
+
+
+##Lets try more values of k for a better model
+```{r message=FALSE, warning=FALSE}
+k3 <- kmeans(df, centers = 3, nstart = 25)
+k4 <- kmeans(df, centers = 4, nstart = 25)
+k5 <- kmeans(df, centers = 5, nstart = 25)
+p1 <- fviz_cluster(k2, geom = "point", data = df) + ggtitle("k = 2")
+p2 <- fviz_cluster(k3, geom = "point",  data = df) + ggtitle("k = 3")
+p3 <- fviz_cluster(k4, geom = "point",  data = df) + ggtitle("k = 4")
+p4 <- fviz_cluster(k5, geom = "point",  data = df) + ggtitle("k = 5")
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+
+##To find the optimal number of clusters, we will try to minimize the within cluster sum of squares of variation, using Elbow method
+```{r message=FALSE, warning=FALSE}
+set.seed(123)
+##calculate within cluster sum of squares
+wss <- function(k) {
+  kmeans(df, k, nstart = 10 )$tot.withinss
+}
+##Plot clusters from 1 to 15
+k.values <- 1:15
+##extract wss
+wss_values <- map_dbl(k.values, wss)
+##Plot the values
+plot(k.values, wss_values,
+       type="b", pch = 19, frame = FALSE, 
+       xlab="Number of clusters K",
+       ylab="Total within-clusters sum of squares")
+```
+
+
+##We can also do the above use fviz_nbclust function
+```{r message=FALSE, warning=FALSE}
+set.seed(123)
+fviz_nbclust(df, kmeans, method = "wss")
+```
+
+
+##Using Average Silhouette method, lets see how each element in a cluster is doing
+```{r message=FALSE, warning=FALSE}
+avg_sil <- function(k) {
+  km.res <- kmeans(df, centers = k, nstart = 25)
+  ss <- silhouette(km.res$cluster, dist(df))
+  mean(ss[, 3])
+}
+k.values <- 2:15
+avg_sil_values <- map_dbl(k.values, avg_sil)
+plot(k.values, avg_sil_values,
+       type = "b", pch = 19, frame = FALSE, 
+       xlab = "Number of clusters K",
+       ylab = "Average Silhouettes")
+```
+
+##We can do the above using the fviz_clust function
+```{r message=FALSE, warning=FALSE}
+fviz_nbclust(df, kmeans, method = "silhouette")
+```
+
+
+##Gap statistic method (another type of clustering)
+```{r message=FALSE, warning=FALSE}
+set.seed(123)
+gap_stat <- clusGap(df, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+print(gap_stat, method = "firstmax")
+fviz_gap_stat(gap_stat)
+```
+
+
+##We can do the same using k-means
+```{r message=FALSE, warning=FALSE}
+set.seed(123)
+final <- kmeans(df, 4, nstart = 25)
+print(final)
+fviz_cluster(final, data = df)
+```
+
+
+##Let us look at the summary statistics using mutate()
+```{r message=FALSE, warning=FALSE}
+USArrests %>%
+  mutate(Cluster = final$cluster) %>%
+  group_by(Cluster) %>%
+  summarise_all("mean")
+```
+
+
+##Hierarchical Cluster Analysis
+```{r message=FALSE, warning=FALSE}
+##We have already prepeed our dataset df but we need to fix for the size
+dfx<-as.dist(1-cor(t(df))/2)
+hc1 <- hclust(dfx, method = "complete" )
+## lets plot the dendrogram
+plot(hc1, cex = 0.6, hang = -1)
+## Lets use the function agnes to find the hierarchical clusters
+hc2 <- agnes(dfx, method = "complete")
+hc2$ac
+```
+
+
+##Identify the strength of the clustering
+```{r message=FALSE, warning=FALSE}
+m <- c( "average", "single", "complete", "ward")
+names(m) <- c( "average", "single", "complete", "ward")
+ac <- function(x) {
+  agnes(dfx, method = x)$ac
+}
+map_dbl(m, ac)
+##Lets create the dendogram
+hc3 <- agnes(dfx, method = "ward")
+pltree(hc3, cex = 0.6, hang = -1, main = "Dendrogram of agnes") 
+```
+
+
+###Divisive hierarchical clustering: using diana()
+```{r message=FALSE, warning=FALSE}
+hc4 <- diana(df)
+hc4$dc
+pltree(hc4, cex = 0.6, hang = -1, main = "Dendrogram of diana")
+```
+
+
+##Using ward's methog
+```{r message=FALSE, warning=FALSE}
+hc5 <- hclust(dfx, method = "ward.D2" )
+sub_grp <- cutree(hc5, k = 4)
+table(sub_grp)
+USArrests %>%
+  mutate(cluster = sub_grp) %>%
+    head
+plot(hc5, cex = 0.6)
+rect.hclust(hc5, k = 4, border = 2:5)
+##Visualize using fviz
+fviz_cluster(list(data = df, cluster = sub_grp))
+```
+
+
+##using cuttree, diana and agnes
+```{r message=FALSE, warning=FALSE}
+hc_a <- agnes(df, method = "ward")
+cutree(as.hclust(hc_a), k = 4)
+hc_d <- diana(df)
+cutree(as.hclust(hc_d), k = 4)
+res.dist <- dist(df, method = "euclidean")
+hc1 <- hclust(res.dist, method = "complete")
+hc2 <- hclust(res.dist, method = "ward.D2")
+#create 2 dendograms
+dend1 <- as.dendrogram (hc1)
+dend2 <- as.dendrogram (hc2)
+tanglegram(dend1, dend2)
+```
+
+
+##calculate entanglement
+```{r message=FALSE, warning=FALSE}
+dend_list <- dendlist(dend1, dend2)
+tanglegram(dend1, dend2,
+  highlight_distinct_edges = FALSE, # Turn-off dashed lines
+  common_subtrees_color_lines = FALSE, # Turn-off line colors
+  common_subtrees_color_branches = TRUE, # Color common branches 
+  main = paste("entanglement =", round(entanglement(dend_list), 2))
+  )
+```
+
+
