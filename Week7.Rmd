@@ -1,0 +1,126 @@
+---
+title: "Week7"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Prerequisite - tidyverse
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+#We will use the mpg dataset to create plots
+```{r message=FALSE, warning=FALSE}
+mpg
+```
+##Creating a ggplot
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+##Let us add color to the graph based on class of the car
+```{r message=FALSE, warning=FALSE}
+ggplot(data=mpg)+geom_point(aes(x=displ, y=hwy, color=class))
+```
+##we can also change the size of the datapoints using class
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = class))
+```
+##We can also change the transpareny of the points and shape of the points
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+##let us split up the plots into separate plots by class using facets
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+##Let us create a geom - A geom is the geometrical object that a plot uses to represent data.
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+
+
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy)) 
+```
+##We can also make groups and add color to it
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, color = drv),
+    show.legend = FALSE
+  )
+```
+##We can also display multiple geoms in the same plot by adding multiple geom functions to ggplot():
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth()
+```
+##Let us add a smooth line for class subcompact
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+```
+##Let us create a bar chart using data diamonds
+```{r message=FALSE, warning=FALSE}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+```
+##Lets add color to this barchart
+```{r message=FALSE, warning=FALSE}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, colour = cut))
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = cut))
+```
+##Lets add layers using 'clarity'
+```{r message=FALSE, warning=FALSE}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+```
+##Let us look at the coordinate systems, and the flipped coordinate systems
+```{r message=FALSE, warning=FALSE}
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+  geom_boxplot()
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+##coord_quickmap() allows us to look at maps and set the aspect ratio correctly
+```{r message=FALSE, warning=FALSE}
+library(maps)
+nz <- map_data("nz")
+
+ggplot(nz, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black")
+
+ggplot(nz, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black") +
+  coord_quickmap()
+```
+
+##Coord_polar() uses polar coordinates
+```{r message=FALSE, warning=FALSE}
+bar <- ggplot(data = diamonds) + 
+  geom_bar(
+    mapping = aes(x = cut, fill = cut), 
+    show.legend = FALSE,
+    width = 1
+  ) + 
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+```
