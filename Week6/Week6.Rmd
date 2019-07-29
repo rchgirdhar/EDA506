@@ -1,0 +1,27 @@
+---
+title: "EDA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+
+library(nycflights13)
+library(tidyverse)
+
+```
+
+##using the dataset flights
+```{r message=FALSE, warning=FALSE}
+flights
+```
+
+##let us filter the dataset and look at data from January 1st.
+```{r message=FALSE, warning=FALSE}
+filter(flights, month == 1, day == 1)
+jan1 <- filter(flights, month == 1, day == 1)
+```
+
